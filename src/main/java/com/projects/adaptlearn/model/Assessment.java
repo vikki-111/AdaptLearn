@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
 import java.time.LocalDateTime;
@@ -27,7 +28,7 @@ public class Assessment {
     private User user;
 
     @Column(name = "overall_score")
-    private Double overallScore;
+    private BigDecimal overallScore;
 
     @Column(name = "passing_score")
     private Double passingScore = 60.0;
