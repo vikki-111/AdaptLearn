@@ -17,20 +17,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, name = "username")
     private String username;
 
     @Column(nullable = false)
-    private String password; // Will be BCrypt encoded
+    private String password;
 
     @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false, name = "name")
+    private String name;
 
     @Column(name = "full_name")
     private String fullName;
 
     @Column(nullable = false)
-    private String role = "STUDENT"; // Default role
+    private String role = "STUDENT";
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<UserProgress> progressLogs;

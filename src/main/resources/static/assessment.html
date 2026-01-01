@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic Assessment - AdaptLearn</title>
+    <link rel="stylesheet" href="styles.css"> <style>
+    /* Custom tweaks for the quiz layout */
+    .quiz-container {
+        max-width: 800px;
+        height: auto; /* Overriding the 80vh from teammate's chat container */
+        min-height: 60vh;
+        margin: 40px auto;
+    }
+    .question-card {
+        background: #f9f9f9;
+        border-left: 5px solid #667eea;
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 5px;
+    }
+    .option-label {
+        display: block;
+        background: white;
+        border: 2px solid #eee;
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .option-label:hover {
+        border-color: #667eea;
+        background: #f0f2ff;
+    }
+    .option-label input {
+        margin-right: 10px;
+    }
+    .submit-area {
+        text-align: center;
+        margin-top: 30px;
+    }
+</style>
+</head>
+<body>
+<div class="container quiz-container">
+    <h1>📝 Learning Assessment</h1>
+    <p style="text-align: center; color: #666;">Answer the questions below so the AI can gauge your mastery.</p>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+    <div id="quizContainer">
+        <div style="text-align: center; padding: 50px;">
+            <div class="loading"></div>
+            <p>Generating your personalized test...</p>
+        </div>
+    </div>
+
+    <div class="submit-area" id="submitArea" style="display: none;">
+        <button onclick="submitQuiz()" id="submitBtn">Finish & Get Results</button>
+    </div>
+</div>
+
+<script src="assessment.js"></script>
+</body>
+</html>
