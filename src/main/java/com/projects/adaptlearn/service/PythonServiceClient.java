@@ -1,60 +1,113 @@
 package com.projects.adaptlearn.service;
 
 import com.projects.adaptlearn.model.Question;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-@Setter
-@Getter
 public class PythonServiceClient {
 
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final String PYTHON_BASE_URL = "http://localhost:5000";
-
+    private final RestTemplate restTemplate;
+    private final String PYTHON_API_URL = "http://127.0.0.1:5000";
     public List<Question> fetchAiQuestions(String topic) {
-        String url = PYTHON_BASE_URL + "/generate-questions";
-        Map<String, Object> request = Map.of(
-                "topic", topic,
-                "count", 5
-        );
+        String url = PYTHON_API_URL + "/generate-questions";
+        System.out.println(">>> [JAVA] Fetching questions: " + topic);
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("topic", topic);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
-            List<Map<String, Object>> response = restTemplate.postForObject(url, request, List.class);
+            List<Map<String, Object>> response = restTemplate.postForObject(url, entity, List.class);
+
+            System.out.println(">>> [JAVA] Parsing questions...");
             List<Question> questions = new ArrayList<>();
 
-            if (response != null) {
+            if (response != null && !response.isEmpty()) {
                 for (Map<String, Object> data : response) {
                     Question q = new Question();
                     q.setQuestionText((String) data.get("questionText"));
-                    q.setOptions((List<String>) data.get("options"));
+
+                    Object optionsObj = data.get("options");
+                    if (optionsObj instanceof List) {
+                        q.setOptions((List<String>) optionsObj);
+                    } else if (optionsObj != null) {
+                        q.setOptions(new ArrayList<>());
+                    }
+
                     q.setCorrectAnswer((String) data.get("correctAnswer"));
                     questions.add(q);
                 }
+                System.out.println(">>> [JAVA] Parsed " + questions.size() + " questions");
+            } else {
+                System.err.println(">>> [JAVA] Empty response");
             }
+
             return questions;
+
+        } catch (org.springframework.web.client.RestClientException e) {
+            System.err.println(">>> [JAVA] Connection error: " + e.getMessage());
+            throw new RuntimeException("Failed to connect to Python AI service. Make sure it's running on localhost:5000", e);
         } catch (Exception e) {
-            System.err.println("Error calling Python AI Service: " + e.getMessage());
-            return Collections.emptyList();
+            System.err.println(">>> [JAVA] Error: " + e.getMessage());
+            throw new RuntimeException("Failed to generate questions from AI service: " + e.getMessage(), e);
         }
     }
-
     public String fetchStudyPlan(List<String> weakAreas) {
-        String url = PYTHON_BASE_URL + "/generate-study-plan";
-        Map<String, Object> request = Map.of("weakAreas", weakAreas);
+        return fetchPersonalizedStudyPlan(weakAreas, "Basic study plan request", 0.0);
+    }
+
+    public String fetchPersonalizedStudyPlan(List<String> weakAreas, String detailedAnalysis, double score) {
+        String url = PYTHON_API_URL + "/generate-personalized-study-plan";
+        System.out.println(">>> [JAVA] Requesting study plan for: " + weakAreas);
+
+        Map<String, Object> request = new HashMap<>();
+        request.put("weakAreas", weakAreas);
+        request.put("detailedAnalysis", detailedAnalysis);
+        request.put("overallScore", score);
 
         try {
             Map<String, String> response = restTemplate.postForObject(url, request, Map.class);
-            return response != null ? response.get("plan_content") : "Plan generation failed.";
+
+            if (response != null && response.containsKey("plan_content")) {
+                return response.get("plan_content");
+            }
+            return generateFallbackPlan(weakAreas, score);
+
         } catch (Exception e) {
-            System.err.println("Error fetching Study Plan: " + e.getMessage());
-            return "Could not generate AI plan at this time.";
+            System.err.println(">>> [JAVA] Plan generation error: " + e.getMessage());
+            return generateFallbackPlan(weakAreas, score);
         }
     }
+
+    private String generateFallbackPlan(List<String> weakAreas, double score) {
+        StringBuilder plan = new StringBuilder();
+        plan.append("# Study Plan\n\n");
+        plan.append(String.format("**Score: %.1f%%**\n\n", score));
+
+        plan.append("## Focus Areas:\n");
+        for (String area : weakAreas) {
+            plan.append(String.format("- **%s**: Review and practice\n", area));
+        }
+
+        plan.append("\n## Actions:\n");
+        plan.append("1. Review fundamentals\n");
+        plan.append("2. Practice exercises\n");
+        plan.append("3. Take notes\n");
+        plan.append("4. Re-test progress\n");
+        plan.append("5. Seek help if needed\n");
+
+        return plan.toString();
+    }
+
 }

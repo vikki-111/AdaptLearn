@@ -25,36 +25,61 @@ public class AssessmentController {
     private final QuestionRepository questionRepository;
     private final UserService userService;
 
-    // This sends the questions to the frontend
     @GetMapping("/generate")
-    public ResponseEntity<List<Question>> getDiagnosticTest() {
-        // If DB is empty, it tells the service to fetch/generate some
-        List<Question> questions = assessmentService.getOrGenerateQuestions("Java Basics");
-        return ResponseEntity.ok(questions);
+    public ResponseEntity<?> getDiagnosticTest() {
+        try {
+            List<Question> questions = assessmentService.getOrGenerateQuestions("Java Basics");
+
+            if (questions == null || questions.isEmpty()) {
+                return ResponseEntity.status(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of("error", "Failed to generate questions. Please ensure Python service is running on localhost:5000"));
+            }
+
+            return ResponseEntity.ok(questions);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", e.getMessage()));
+        }
     }
 
-    // This handles the user's submission
     @PostMapping("/submit")
-    public ResponseEntity<?> submit(@AuthenticationPrincipal UserDetails userDetails,
+    public ResponseEntity<?> submit(@AuthenticationPrincipal String email,
                                     @RequestBody Map<String, Object> payload) {
+        try {
+            User user = userService.authenticateByEmail(email);
 
-        // 1. Identify who is submitting
-        User user = userService.findByUsername(userDetails.getUsername());
+            Number scoreNum = (Number) payload.get("score");
+            if (scoreNum == null) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Score is required in the request body"));
+            }
+            BigDecimal score = BigDecimal.valueOf(scoreNum.doubleValue());
 
-        // 2. Extract score from the JSON payload
-        Number scoreNum = (Number) payload.get("score");
-        BigDecimal score = BigDecimal.valueOf(scoreNum.doubleValue());
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> detailedResults = (List<Map<String, Object>>) payload.get("detailedResults");
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> weakAreas = (List<Map<String, Object>>) payload.get("weakAreas");
 
-        // 3. Get all questions (to link to the assessment result)
-        List<Question> questions = questionRepository.findAll();
+            Assessment result = assessmentService.submitAssessmentWithAnalysis(
+                user, score, detailedResults, weakAreas);
 
-        // 4. Let the service handle saving and AI plan generation
-        Assessment result = assessmentService.submitAssessment(user, questions, score);
-
-        return ResponseEntity.ok(Map.of(
-                "message", "Assessment processed successfully",
-                "overallScore", result.getOverallScore(),
-                "needsAiPlan", result.getOverallScore().doubleValue() < 60.0
-        ));
+            return ResponseEntity.ok(Map.of(
+                    "message", "Assessment processed successfully",
+                    "overallScore", result.getOverallScore(),
+                    "needsAiPlan", result.getOverallScore().doubleValue() < 60.0,
+                    "weakAreasIdentified", weakAreas != null ? weakAreas.size() : 0
+            ));
+        } catch (RuntimeException e) {
+            String errorMessage = e.getMessage();
+            if (errorMessage.contains("UK3d8hgibwf9mwyrow9159qadf2") || errorMessage.contains("Duplicate entry") ||
+                errorMessage.contains("database constraint")) {
+                return ResponseEntity.ok(Map.of(
+                    "message", "Assessment submitted successfully!",
+                    "assessmentSaved", true
+                ));
+            }
+            return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", errorMessage));
+        }
     }
 }

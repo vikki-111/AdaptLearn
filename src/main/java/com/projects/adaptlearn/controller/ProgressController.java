@@ -27,9 +27,9 @@ public class ProgressController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<?> getMyProgress(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> getMyProgress(@AuthenticationPrincipal String email) {
 
-        User user = userService.findByUsername(userDetails.getUsername());
+        User user = userService.authenticateByEmail(email);
 
         List<Assessment> history = assessmentRepository.findByUserIdOrderByCompletedAtDesc(user.getId());
 

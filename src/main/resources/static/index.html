@@ -3,26 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat Bot</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>AI Learning Assistant - AdaptLearn</title>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <div class="container">
-        <h1>🤖 AI Chat Bot</h1>
-        <button class="reset-btn" onclick="resetConversation()">Reset Conversation</button>
+        <h1>🤖 AI Learning Assistant</h1>
+        <p class="text-center" style="color: #666; margin-bottom: 30px;">
+            Ask me anything about programming, concepts, or get help with your studies!
+        </p>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <button onclick="resetConversation()" class="btn-secondary">
+                🔄 Reset Chat
+            </button>
+            <button onclick="window.location.href='/assessment'" class="btn-primary">
+                📝 Take Assessment
+            </button>
+        </div>
+
         <div class="chat-messages" id="chatMessages">
-            <div class="message assistant">Hello! I'm your AI assistant. How can I help you today?</div>
+            <div class="message assistant">
+                <strong>🤖 AI Assistant:</strong><br>
+                Hello! I'm your AI learning assistant. I can help you with:
+                <br>• Programming concepts and explanations
+                <br>• Code debugging and optimization
+                <br>• Study tips and learning strategies
+                <br>• Answer questions about any topic
+                <br><br>What would you like to learn today?
+            </div>
         </div>
+
         <div class="input-group">
-            <input type="text" id="messageInput" placeholder="Type your message...">
-            <button onclick="sendMessage()" id="sendBtn">Send</button>
+            <input type="text" id="messageInput" placeholder="Ask me anything about learning or programming...">
+            <button onclick="sendMessage()" id="sendBtn" class="btn-primary">Send Message</button>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h1>🤖 AI Chat Bot</h1>
-            <button onclick="window.location.href='assessment.html'" style="background: #2ecc71;">Take Test</button>
+
+        <div class="text-center mt-20">
+            <p style="color: #666; font-size: 14px;">
+                💡 Tip: Try asking about specific programming concepts or request help with your studies
+            </p>
         </div>
     </div>
 
-    <script src="chat.js"></script>
+    <script src="/js/chat.js"></script>
 </body>
 </html>

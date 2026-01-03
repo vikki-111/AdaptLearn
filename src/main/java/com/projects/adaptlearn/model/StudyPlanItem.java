@@ -1,9 +1,6 @@
 package com.projects.adaptlearn.model;
 
-import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +19,7 @@ public class StudyPlanItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_id", nullable = false)
+    @JsonIgnore
     private StudyPlan studyPlan;
 
     @ManyToOne(fetch = FetchType.EAGER) // Eager because we usually need the topic name immediately

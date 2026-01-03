@@ -1,23 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AdaptLearn - Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-<h1 id="user-welcome">Loading...</h1>
+    <div class="container">
+        <h1 id="user-welcome" style="margin-bottom: 10px;">Loading...</h1>
+        <p class="text-center" style="color: #666; margin-bottom: 40px;">
+            Welcome back! Here's your learning progress and personalized study plan.
+        </p>
 
-<div class="stats">
-    <h2>Latest Diagnostic Score: <span id="latest-score">--</span></h2>
-</div>
+        <div class="stats">
+            <h2>📊 Latest Assessment Score</h2>
+            <div id="latest-score">--</div>
+        </div>
 
-<hr>
+        <div id="study-plan-section">
+            <h2>🎯 Your AI-Generated Study Plan</h2>
+            <div id="study-plan-container">
+                <div class="loading-spinner">
+                    <div class="loading"></div>
+                    <p>Loading your personalized study plan...</p>
+                </div>
+            </div>
+        </div>
 
-<div id="study-plan-section">
-    <h2>Your Personalized AI Plan</h2>
-    <div id="study-plan-container">
+        <div class="text-center mt-20">
+            <button onclick="window.location.href='/assessment'" class="btn-primary">
+                📝 Take Another Assessment
+            </button>
+        </div>
     </div>
-</div>
 
-<script src="js/dashboard.js"></script>
+    <script src="/js/dashboard.js"></script>
 </body>
 </html>

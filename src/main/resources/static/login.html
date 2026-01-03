@@ -1,19 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AdaptLearn - Login</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-<div class="container" style="height: auto; max-width: 400px;">
-    <h1>🔐 Login</h1>
-    <div class="input-group" style="flex-direction: column;">
-        <input type="text" id="username" placeholder="Username">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="handleLogin()">Login</button>
+    <div class="container" style="height: auto; max-width: 450px;">
+        <h1>🔐 Welcome Back</h1>
+
+        <div id="error" class="error-message" style="display: none;">
+            Invalid username or password. Please try again.
+        </div>
+
+        <form onsubmit="event.preventDefault(); handleLogin();">
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Enter your username" required>
+                <input type="password" id="password" placeholder="Enter your password" required>
+                <button type="submit" class="btn-primary" style="width: 100%;">Login to AdaptLearn</button>
+            </div>
+        </form>
+
+        <div class="text-center mt-20">
+            <p>Don't have an account? <a href="/register">Create one here</a></p>
+        </div>
+
+        <div class="text-center mt-20">
+            <p style="color: #666; font-size: 14px;">
+                📚 Personalized learning powered by AI
+            </p>
+        </div>
     </div>
-    <p id="error" style="color: red; display: none;">Invalid Credentials</p>
-</div>
-<script src="js/auth.js"></script>
+
+    <script src="/js/auth.js"></script>
 </body>
 </html>

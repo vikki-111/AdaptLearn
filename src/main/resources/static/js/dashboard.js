@@ -2,7 +2,7 @@ async function loadDashboard() {
     const token = localStorage.getItem('token');
 
     if (!token) {
-        window.location.href = '/login.html';
+        window.location.href = '/login';
         return;
     }
 
@@ -30,17 +30,28 @@ async function loadDashboard() {
 
         // 3. Display AI Study Plan
         const planContainer = document.getElementById('study-plan-container');
-        if (data.latestPlans.length > 0) {
+        if (data.latestPlans && data.latestPlans.length > 0) {
             const latestPlan = data.latestPlans[0];
-            // Using innerText for security, or innerHTML if you trust the AI's Markdown
+            const planContent = latestPlan.aiRecommendations || latestPlan.content || 'No plan content available';
+            const createdDate = latestPlan.createdAt ? new Date(latestPlan.createdAt).toLocaleDateString() : 'Recently';
+            // Using innerHTML to render Markdown content from AI
             planContainer.innerHTML = `
-                <div class="plan-card" style="background: #f9f9f9; padding: 20px; border-left: 5px solid #007bff;">
-                    <h3>Your AI Learning Path (Generated ${new Date(latestPlan.createdAt).toLocaleDateString()})</h3>
-                    <div class="content" style="white-space: pre-wrap;">${latestPlan.content}</div>
+                <div class="study-plan-card">
+                    <h3>🎯 Your AI Learning Path</h3>
+                    <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Generated on ${createdDate}</p>
+                    <div class="content">${planContent}</div>
                 </div>
             `;
         } else {
-            planContainer.innerHTML = "<p>Complete a test with a score below 60% to generate a plan.</p>";
+            planContainer.innerHTML = `
+                <div class="study-plan-card">
+                    <h3>📚 No Study Plan Yet</h3>
+                    <p style="color: #666; margin-bottom: 15px;">Complete a diagnostic assessment with a score below 60% to receive a personalized AI-generated study plan.</p>
+                    <button onclick="window.location.href='/assessment'" class="btn-primary" style="margin-top: 10px;">
+                        Take Your First Assessment
+                    </button>
+                </div>
+            `;
         }
 
     } catch (error) {

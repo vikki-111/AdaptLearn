@@ -1,5 +1,6 @@
 package com.projects.adaptlearn.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,10 +37,12 @@ public class User {
     private String role = "STUDENT";
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<UserProgress> progressLogs;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private StudyPlan currentStudyPlan;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<StudyPlan> studyPlans;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

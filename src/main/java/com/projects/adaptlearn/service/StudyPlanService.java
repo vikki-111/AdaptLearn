@@ -29,6 +29,7 @@ public class StudyPlanService {
             // 3. Create and Save the StudyPlan entity
             StudyPlan plan = new StudyPlan();
             plan.setUser(user);
+            plan.setAiRecommendations(planContent);
             plan.setCreatedAt(LocalDateTime.now());
 
             studyPlanRepository.save(plan);

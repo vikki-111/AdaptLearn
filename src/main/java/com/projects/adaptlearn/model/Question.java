@@ -1,4 +1,5 @@
 package com.projects.adaptlearn.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class Question {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assessment_id")
+    @JsonIgnore
     private Assessment assessment;
 
     @Column(name = "question_text", nullable = false, columnDefinition = "TEXT")
