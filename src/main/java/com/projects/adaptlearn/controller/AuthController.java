@@ -19,33 +19,25 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@RequestBody User user) {
-        try {
-            User registeredUser = userService.registerUser(user);
-            UserResponse userResponse = new UserResponse(
-                    registeredUser.getId(),
-                    registeredUser.getUsername(),
-                    registeredUser.getEmail()
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+        User registeredUser = userService.registerUser(user);
+        UserResponse userResponse = new UserResponse(
+                registeredUser.getId(),
+                registeredUser.getUsername(),
+                registeredUser.getEmail()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest){
-        try {
-            User user = userService.authenticateByUsername(loginRequest.getUsername(), loginRequest.getPassword());
-            String token = jwtService.generateToken(user.getEmail(), user.getId());
+        User user = userService.authenticateByUsername(loginRequest.getUsername(), loginRequest.getPassword());
+        String token = jwtService.generateToken(user.getEmail(), user.getId());
 
-            LoginResponse response = new LoginResponse(
-                    token,
-                    user.getId(),
-                    user.getUsername()
-            );
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        LoginResponse response = new LoginResponse(
+                token,
+                user.getId(),
+                user.getUsername()
+        );
+        return ResponseEntity.ok(response);
     }
 }

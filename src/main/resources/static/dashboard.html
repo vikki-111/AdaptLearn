@@ -8,6 +8,12 @@
 </head>
 <body>
     <div class="container">
+        <div class="logout-container">
+            <button onclick="logout()" class="btn-secondary logout-btn">
+                🚪 Logout
+            </button>
+        </div>
+
         <h1 id="user-welcome" style="margin-bottom: 10px;">Loading...</h1>
         <p class="text-center" style="color: #666; margin-bottom: 40px;">
             Welcome back! Here's your learning progress and personalized study plan.
@@ -29,9 +35,14 @@
         </div>
 
         <div class="text-center mt-20">
-            <button onclick="window.location.href='/assessment'" class="btn-primary">
-                📝 Take Another Assessment
-            </button>
+            <div class="dashboard-actions">
+                <button onclick="window.location.href='/topic-selection'" class="btn-primary">
+                    📝 Take Another Assessment
+                </button>
+                <button onclick="window.location.href='/chat'" class="btn-secondary">
+                    💬 Chat with AI Assistant
+                </button>
+            </div>
         </div>
     </div>
 

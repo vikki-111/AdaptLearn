@@ -26,8 +26,8 @@ async function handleLogin() {
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('token', data.token);
-            // Redirect to the assessment page
-            window.location.href = '/assessment';
+            // Redirect to topic selection page
+            window.location.href = '/topic-selection';
         } else {
             // Handle error response
             if (errorElement) {

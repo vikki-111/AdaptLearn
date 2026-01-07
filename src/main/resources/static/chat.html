@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant Chat - AdaptLearn</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="logout-container">
+            <button onclick="logout()" class="btn-secondary logout-btn">
+                🚪 Logout
+            </button>
+        </div>
+
+        <h1>🤖 AI Learning Assistant</h1>
+        <p class="text-center" style="color: #666; margin-bottom: 30px;">
+            Ask me anything about programming, algorithms, or get help with your studies!
+        </p>
+
+        <div class="chat-container">
+            <div id="chat-messages" class="chat-messages">
+                <div class="message assistant-message">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        <div class="message-text">
+                            Hello! I'm your AI learning assistant. I can help you with:
+                        </div>
+                        <ul class="assistant-capabilities">
+                            <li>💡 Programming concepts and code explanations</li>
+                            <li>🔍 Algorithm explanations and examples</li>
+                            <li>📚 Study tips and learning strategies</li>
+                            <li>❓ General programming questions</li>
+                            <li>🎯 Assessment preparation help</li>
+                        </ul>
+                        <div class="message-text">
+                            What would you like to learn about today?
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <input type="text" id="chat-input" placeholder="Ask me anything about programming..." maxlength="500">
+                    <button onclick="sendMessage()" id="send-button" class="btn-primary send-button">
+                        📤 Send
+                    </button>
+                </div>
+                <div class="chat-status" id="chat-status">
+                    Type your question and press Enter or click Send
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-20">
+            <button onclick="window.location.href='/dashboard'" class="btn-secondary">
+                ← Back to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <script src="/js/chat.js"></script>
+</body>
+</html>

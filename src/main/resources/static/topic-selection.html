@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Topic - AdaptLearn</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="logout-container">
+            <button onclick="logout()" class="btn-secondary logout-btn">
+                🚪 Logout
+            </button>
+        </div>
+
+        <h1>🎯 Choose Your Learning Topic</h1>
+        <p class="text-center" style="color: #666; margin-bottom: 40px;">
+            Select a topic you'd like to learn about. Our AI will create personalized questions and a study plan just for you.
+        </p>
+
+        <div class="topic-grid">
+            <div class="topic-card" onclick="selectTopic('Java')">
+                <div class="topic-icon">☕</div>
+                <h3>Java Programming</h3>
+                <p>Object-oriented programming, JVM, Spring Framework</p>
+            </div>
+
+            <div class="topic-card" onclick="selectTopic('Python')">
+                <div class="topic-icon">🐍</div>
+                <h3>Python Programming</h3>
+                <p>Data science, web development, automation</p>
+            </div>
+
+            <div class="topic-card" onclick="selectTopic('JavaScript')">
+                <div class="topic-icon">🟨</div>
+                <h3>JavaScript</h3>
+                <p>Frontend development, Node.js, React</p>
+            </div>
+
+            <div class="topic-card" onclick="selectTopic('Data Structures')">
+                <div class="topic-icon">📊</div>
+                <h3>Data Structures</h3>
+                <p>Arrays, trees, graphs, algorithms</p>
+            </div>
+
+            <div class="topic-card" onclick="selectTopic('Database Design')">
+                <div class="topic-icon">🗄️</div>
+                <h3>Database Design</h3>
+                <p>SQL, NoSQL, normalization, indexing</p>
+            </div>
+
+            <div class="topic-card" onclick="selectTopic('Web Development')">
+                <div class="topic-icon">🌐</div>
+                <h3>Web Development</h3>
+                <p>HTML, CSS, HTTP, REST APIs</p>
+            </div>
+
+            <div class="topic-card" onclick="selectTopic('Machine Learning')">
+                <div class="topic-icon">🤖</div>
+                <h3>Machine Learning</h3>
+                <p>Algorithms, models, neural networks</p>
+            </div>
+
+            <div class="topic-card" onclick="selectTopic('DevOps')">
+                <div class="topic-icon">⚙️</div>
+                <h3>DevOps</h3>
+                <p>CI/CD, Docker, Kubernetes, cloud</p>
+            </div>
+
+            <div class="topic-card custom-topic" onclick="showCustomTopicInput()">
+                <div class="topic-icon">✨</div>
+                <h3>Custom Topic</h3>
+                <p>Enter your own learning topic</p>
+            </div>
+        </div>
+
+        <div id="customTopicModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>Enter Your Topic</h3>
+                <input type="text" id="customTopicInput" placeholder="e.g., React Hooks, AWS Lambda, GraphQL..." maxlength="50">
+                <div class="modal-buttons">
+                    <button onclick="hideCustomTopicInput()" class="btn-secondary">Cancel</button>
+                    <button onclick="selectCustomTopic()" class="btn-primary">Start Learning</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+    </div>
+
+    <script src="/js/topic-selection.js"></script>
+</body>
+</html>

@@ -27,10 +27,10 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         // 1. PUBLIC ROUTES (The browser needs to reach these clean URLs first)
-                        .requestMatchers("/", "/login", "/register", "/assessment", "/dashboard").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/assessment", "/dashboard", "/topic-selection", "/chat").permitAll()
 
                         // 2. STATIC FILES (The CSS and JS needed to render those pages)
-                        .requestMatchers("/index.html", "/login.html", "/register.html", "/assessment.html", "/dashboard.html").permitAll()
+                        .requestMatchers("/index.html", "/login.html", "/register.html", "/assessment.html", "/dashboard.html", "/topic-selection.html", "/chat.html").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
                         // 3. PUBLIC API
@@ -42,6 +42,13 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers(headers -> headers
+                    .frameOptions(frameOptions -> frameOptions.deny())
+                    .contentTypeOptions(contentTypeOptions -> contentTypeOptions.disable())
+                    .httpStrictTransportSecurity(hstsConfig -> hstsConfig
+                        .maxAgeInSeconds(31536000)
+                        .includeSubdomains(true))
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
@@ -51,12 +58,14 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:3000"));
-        config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+        // Only allow the actual application origin, not development servers
+        config.setAllowedOrigins(List.of("${app.cors.allowed-origin:http://localhost:8080}"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setMaxAge(3600L); // Cache preflight for 1 hour
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/api/**", config); // Only apply to API endpoints
         return source;
     }
 

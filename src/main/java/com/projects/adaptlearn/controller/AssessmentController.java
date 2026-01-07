@@ -26,9 +26,9 @@ public class AssessmentController {
     private final UserService userService;
 
     @GetMapping("/generate")
-    public ResponseEntity<?> getDiagnosticTest() {
+    public ResponseEntity<?> getDiagnosticTest(@RequestParam(defaultValue = "Java") String topic) {
         try {
-            List<Question> questions = assessmentService.getOrGenerateQuestions("Java Basics");
+            List<Question> questions = assessmentService.getOrGenerateQuestions(topic);
 
             if (questions == null || questions.isEmpty()) {
                 return ResponseEntity.status(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)

@@ -1,92 +1,160 @@
-const chatMessages = document.getElementById('chatMessages');
-const messageInput = document.getElementById('messageInput');
-const sendBtn = document.getElementById('sendBtn');
+// Chat state
+let isWaitingForResponse = false;
 
-async function sendMessage() {
-    const message = messageInput.value.trim();
-    if (!message) return;
+function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const message = input.value.trim();
 
-    // --- NEW: CHECK FOR TOKEN BEFORE SENDING ---
-    const token = localStorage.getItem('token');
-    if (!token) {
-        alert("Please login first!");
-        window.location.href = 'login.html';
+    if (!message) {
+        showStatus('Please enter a message', 'error');
         return;
     }
-    // --------------------------------------------
 
-    addMessage('user', message);
-    messageInput.value = '';
+    if (isWaitingForResponse) {
+        showStatus('Please wait for the AI to respond...', 'info');
+        return;
+    }
 
-    sendBtn.disabled = true;
-    messageInput.disabled = true;
-    sendBtn.innerHTML = '<div class="loading"></div>';
+    // Add user message to chat
+    addMessage(message, 'user');
+
+    // Clear input
+    input.value = '';
+    showStatus('AI is thinking...', 'info');
+
+    // Send to backend
+    sendToAI(message);
+}
+
+async function sendToAI(message) {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        showStatus('Please login first', 'error');
+        setTimeout(() => window.location.href = '/login', 2000);
+        return;
+    }
+
+    isWaitingForResponse = true;
 
     try {
-        // --- UPDATED FETCH CALL ---
-        const response = await fetch('/api/chat', { // Added /api
+        const response = await fetch('/api/chat/message', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` // Added JWT Header
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ message: message })
         });
-        // ---------------------------
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'Failed to get AI response' }));
+            throw new Error(errorData.message || 'AI service unavailable');
+        }
 
         const data = await response.json();
+        addMessage(data.response, 'assistant');
 
-        if (data.error) {
-            addMessage('assistant', '❌ ' + data.error);
-        } else {
-            addMessage('assistant', data.reply);
-        }
     } catch (error) {
-        addMessage('assistant', '❌ Error sending message. Please try again.');
+        console.error('Chat error:', error);
+        addMessage('Sorry, I encountered an error. Please try again or check if the AI service is running.', 'assistant', true);
     } finally {
-        sendBtn.disabled = false;
-        messageInput.disabled = false;
-        sendBtn.innerText = 'Send';
-        messageInput.focus();
+        isWaitingForResponse = false;
+        showStatus('Type your question and press Enter or click Send');
     }
 }
 
-function addMessage(role, content) {
+function addMessage(text, sender, isError = false) {
+    const messagesContainer = document.getElementById('chat-messages');
     const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${role}`;
-    messageDiv.innerHTML = renderMarkdown(content);
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    messageDiv.className = `message ${sender}-message ${isError ? 'error-message' : ''}`;
+
+    const avatar = sender === 'user' ? '👤' : '🤖';
+
+    messageDiv.innerHTML = `
+        <div class="message-avatar">${avatar}</div>
+        <div class="message-content">
+            <div class="message-text">${formatMessage(text)}</div>
+            <div class="message-time">${new Date().toLocaleTimeString()}</div>
+        </div>
+    `;
+
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-function renderMarkdown(text) {
-    // Simple Markdown rendering for basic formatting
+function formatMessage(text) {
+    if (!text) return '';
+
+    // First, escape HTML to prevent XSS
+    text = escapeHtml(text);
+
+    // Then convert markdown to HTML
     return text
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // **bold**
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')  // *italic*
-        .replace(/`(.*?)`/g, '<code>$1</code>')  // `code`
-        .replace(/\n/g, '<br>');  // Line breaks
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\n/g, '<br>');
 }
 
-async function resetConversation() {
-    const token = localStorage.getItem('token');
-    try {
-        await fetch('/api/reset', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` } // Also needs auth
-        });
-        chatMessages.innerHTML = '<div class="message assistant">Hello! I\'m your AI assistant. How can I help you today?</div>';
-    } catch (error) {
-        alert('Error resetting conversation');
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+function showStatus(message, type = 'info') {
+    const statusElement = document.getElementById('chat-status');
+    statusElement.textContent = message;
+    statusElement.className = `chat-status ${type}`;
+
+    // Auto-hide success messages after 3 seconds
+    if (type === 'info') {
+        setTimeout(() => {
+            statusElement.textContent = 'Type your question and press Enter or click Send';
+            statusElement.className = 'chat-status';
+        }, 3000);
     }
 }
 
-// Allow Enter key to send message
-messageInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter' && !sendBtn.disabled) {
-        sendMessage();
+function logout() {
+    // Clear all stored data
+    localStorage.removeItem('token');
+    localStorage.removeItem('selectedTopic');
+
+    // Redirect to login page
+    window.location.href = '/login';
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('chat-input');
+    const sendButton = document.getElementById('send-button');
+
+    // Enter key to send
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Send button click
+    sendButton.addEventListener('click', sendMessage);
+
+    // Focus input
+    input.focus();
+
+    // Check authentication
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showStatus('Please login first', 'error');
+        setTimeout(() => window.location.href = '/login', 2000);
     }
 });
-
-// Focus input on load
-window.addEventListener('load', () => messageInput.focus());

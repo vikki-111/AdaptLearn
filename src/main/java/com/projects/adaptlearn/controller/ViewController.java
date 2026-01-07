@@ -29,4 +29,14 @@ public class ViewController {
     public String dashboard() {
         return "forward:/dashboard.html";
     }
+
+    @GetMapping("/topic-selection")
+    public String topicSelection() {
+        return "forward:/topic-selection.html";
+    }
+
+    @GetMapping("/chat")
+    public String chat() {
+        return "forward:/chat.html";
+    }
 }

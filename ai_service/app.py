@@ -3,14 +3,42 @@ from flask_cors import CORS
 import google.generativeai as genai
 import json
 import re
+import os
+import time
+from dotenv import load_dotenv
+from collections import defaultdict
 
-API_KEY = "AIzaSyBS_336TtafApvnq_u3ehzrIG39vfhGAms"
+load_dotenv()
+
+# Rate limiting storage
+user_requests = defaultdict(list)
+RATE_LIMIT_REQUESTS = 10  # requests
+RATE_LIMIT_WINDOW = 60    # seconds
+
+API_KEY = os.getenv('GOOGLE_API_KEY')
+if not API_KEY:
+    raise ValueError("GOOGLE_API_KEY environment variable is not set. Please check your .env file.")
+
 genai.configure(api_key=API_KEY)
 
 working_model_name = None
 
 def get_working_model():
     global working_model_name
+    print("Trying gemini-2.5-flash as default model...")
+
+    # First, try gemini-2.5-flash directly
+    try:
+        print("Trying: gemini-2.5-flash")
+        test_model = genai.GenerativeModel('gemini-2.5-flash')
+        working_model_name = 'gemini-2.5-flash'
+        print("✓ Success: gemini-2.5-flash (default model)")
+        return test_model
+    except Exception as e:
+        error_msg = str(e)
+        print(f"✗ gemini-2.5-flash failed: {error_msg[:100]}")
+        print("Falling back to model discovery...")
+
     print("Discovering available models...")
 
     try:
@@ -44,7 +72,7 @@ def get_working_model():
             else:
                 free_tier_models.append(model_info)
         
-        preferred_order = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro', 'gemini-1.0-pro']
+        preferred_order = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro', 'gemini-1.0-pro']
 
         for preferred in preferred_order:
             for model_info in free_tier_models:
@@ -85,6 +113,8 @@ def get_working_model():
     except Exception as e:
         print(f"Error discovering models: {e}")
         fallback_models = [
+            'gemini-2.5-flash',
+            'models/gemini-2.5-flash',
             'gemini-1.5-flash',
             'gemini-1.5-pro',
             'gemini-pro',
@@ -255,6 +285,71 @@ def generate_fallback_plan(weak_areas, score):
 - Community forums
 """
     return plan
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    data = request.json
+    message = data.get('message', '')
+    user_email = data.get('user_email', 'anonymous')
+
+    # Rate limiting
+    current_time = time.time()
+    user_requests[user_email] = [req_time for req_time in user_requests[user_email]
+                                if current_time - req_time < RATE_LIMIT_WINDOW]
+
+    if len(user_requests[user_email]) >= RATE_LIMIT_REQUESTS:
+        return jsonify({"error": "Rate limit exceeded. Please wait before sending more messages."}), 429
+
+    user_requests[user_email].append(current_time)
+
+    if not message.strip():
+        return jsonify({"error": "Message cannot be empty"}), 400
+
+    # Sanitize input to prevent prompt injection
+    message = message.strip()
+    if len(message) > 1000:  # Limit message length
+        return jsonify({"error": "Message too long (max 1000 characters)"}), 400
+
+    # Basic sanitization - remove potentially dangerous patterns
+    import re
+    message = re.sub(r'[<>]', '', message)  # Remove angle brackets
+    message = re.sub(r'javascript:', '', message, flags=re.IGNORECASE)  # Remove javascript: protocol
+
+    prompt = f"""
+You are an AI learning assistant for AdaptLearn, a programming education platform.
+A student ({user_email}) asked: "{message}"
+
+Provide a helpful, educational response about programming concepts. Keep your response:
+- Concise but informative (under 300 words)
+- Educational and encouraging
+- Related to programming, algorithms, or computer science
+- Include code examples when relevant
+- Be friendly and supportive
+
+If the question is not programming-related, gently redirect to programming topics.
+"""
+
+    if model is None:
+        return jsonify({"error": "AI model not initialized"}), 500
+
+    try:
+        response = model.generate_content(prompt)
+        reply = response.text.strip()
+
+        # Clean up any markdown artifacts
+        if reply.startswith("```"):
+            reply = re.sub(r'^```[a-z]*\n|```$', '', reply, flags=re.MULTILINE).strip()
+
+        return jsonify({"reply": reply})
+
+    except Exception as e:
+        error_msg = str(e)
+        print(f"Chat error: {error_msg}")
+
+        if "quota" in error_msg.lower() or "429" in error_msg:
+            return jsonify({"error": "API quota exceeded. Please wait and try again."}), 429
+
+        return jsonify({"error": "Failed to generate response"}), 500
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True, threaded=True)
