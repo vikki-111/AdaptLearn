@@ -4,16 +4,9 @@ import google.generativeai as genai
 import json
 import re
 import os
-import time
 from dotenv import load_dotenv
-from collections import defaultdict
 
 load_dotenv()
-
-# Rate limiting storage
-user_requests = defaultdict(list)
-RATE_LIMIT_REQUESTS = 10  # requests
-RATE_LIMIT_WINDOW = 60    # seconds
 
 API_KEY = os.getenv('GOOGLE_API_KEY')
 if not API_KEY:
@@ -292,28 +285,8 @@ def chat():
     message = data.get('message', '')
     user_email = data.get('user_email', 'anonymous')
 
-    # Rate limiting
-    current_time = time.time()
-    user_requests[user_email] = [req_time for req_time in user_requests[user_email]
-                                if current_time - req_time < RATE_LIMIT_WINDOW]
-
-    if len(user_requests[user_email]) >= RATE_LIMIT_REQUESTS:
-        return jsonify({"error": "Rate limit exceeded. Please wait before sending more messages."}), 429
-
-    user_requests[user_email].append(current_time)
-
     if not message.strip():
         return jsonify({"error": "Message cannot be empty"}), 400
-
-    # Sanitize input to prevent prompt injection
-    message = message.strip()
-    if len(message) > 1000:  # Limit message length
-        return jsonify({"error": "Message too long (max 1000 characters)"}), 400
-
-    # Basic sanitization - remove potentially dangerous patterns
-    import re
-    message = re.sub(r'[<>]', '', message)  # Remove angle brackets
-    message = re.sub(r'javascript:', '', message, flags=re.IGNORECASE)  # Remove javascript: protocol
 
     prompt = f"""
 You are an AI learning assistant for AdaptLearn, a programming education platform.

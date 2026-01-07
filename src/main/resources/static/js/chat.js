@@ -84,29 +84,13 @@ function addMessage(text, sender, isError = false) {
 }
 
 function formatMessage(text) {
-    if (!text) return '';
-
-    // First, escape HTML to prevent XSS
-    text = escapeHtml(text);
-
-    // Then convert markdown to HTML
+    // Convert basic markdown to HTML
     return text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
         .replace(/`([^`]+)`/g, '<code>$1</code>')
         .replace(/\n/g, '<br>');
-}
-
-function escapeHtml(text) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
-    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 
 function showStatus(message, type = 'info') {

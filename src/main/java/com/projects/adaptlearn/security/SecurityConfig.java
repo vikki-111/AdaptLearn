@@ -42,13 +42,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .headers(headers -> headers
-                    .frameOptions(frameOptions -> frameOptions.deny())
-                    .contentTypeOptions(contentTypeOptions -> contentTypeOptions.disable())
-                    .httpStrictTransportSecurity(hstsConfig -> hstsConfig
-                        .maxAgeInSeconds(31536000)
-                        .includeSubdomains(true))
-                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
@@ -58,14 +51,12 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        // Only allow the actual application origin, not development servers
-        config.setAllowedOrigins(List.of("${app.cors.allowed-origin:http://localhost:8080}"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        config.setAllowedOrigins(List.of("http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:3000"));
+        config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setMaxAge(3600L); // Cache preflight for 1 hour
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config); // Only apply to API endpoints
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 
