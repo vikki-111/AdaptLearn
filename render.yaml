@@ -39,7 +39,7 @@ services:
     region: oregon
     rootDir: ai_service
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn -b 0.0.0.0:$PORT app:app
     envVars:
       - key: GOOGLE_API_KEY
         sync: false

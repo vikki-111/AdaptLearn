@@ -32,7 +32,7 @@ public class AssessmentController {
 
             if (questions == null || questions.isEmpty()) {
                 return ResponseEntity.status(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE)
-                    .body(Map.of("error", "Failed to generate questions. Please ensure Python service is running on localhost:5000"));
+                    .body(Map.of("error", "Failed to generate questions. AI Service may be unavailable."));
             }
 
             return ResponseEntity.ok(questions);
