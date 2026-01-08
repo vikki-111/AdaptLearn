@@ -49,3 +49,5 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetails, status);
     }
 }
+
+

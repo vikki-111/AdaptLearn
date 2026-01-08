@@ -1,5 +1,6 @@
 package com.projects.adaptlearn.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import com.projects.adaptlearn.model.Question;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,8 @@ import java.util.*;
 public class PythonServiceClient {
 
     private final RestTemplate restTemplate;
-    private final String PYTHON_API_URL = "http://127.0.0.1:5000";
+    @Value("${AI_SERVICE_URL:http://127.0.0.1:5000}")
+    private String PYTHON_API_URL;
     public List<Question> fetchAiQuestions(String topic) {
         String url = PYTHON_API_URL + "/generate-questions";
         System.out.println(">>> [JAVA] Fetching questions: " + topic);
@@ -57,7 +59,7 @@ public class PythonServiceClient {
 
         } catch (org.springframework.web.client.RestClientException e) {
             System.err.println(">>> [JAVA] Connection error: " + e.getMessage());
-            throw new RuntimeException("Failed to connect to Python AI service. Make sure it's running on localhost:5000", e);
+            throw new RuntimeException("Failed to connect to Python AI service. Make sure AI_SERVICE_URL is configured correctly or the service is running.", e);
         } catch (Exception e) {
             System.err.println(">>> [JAVA] Error: " + e.getMessage());
             throw new RuntimeException("Failed to generate questions from AI service: " + e.getMessage(), e);
