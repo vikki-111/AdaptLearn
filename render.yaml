@@ -3,6 +3,7 @@ services:
   - type: web
     name: adapt-learn-backend
     runtime: docker
+    plan: free
     region: oregon
     envVars:
       - key: DB_HOST
@@ -34,6 +35,7 @@ services:
   - type: web
     name: adapt-learn-ai
     runtime: python
+    plan: free
     region: oregon
     rootDir: ai_service
     buildCommand: pip install -r requirements.txt
@@ -48,4 +50,5 @@ databases:
   - name: adapt-learn-db
     databaseName: adapt_learn
     user: adapt_user
+    plan: free
     region: oregon
