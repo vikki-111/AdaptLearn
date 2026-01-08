@@ -1,15 +1,26 @@
 services:
-  # Main Java Spring Boot application
+  # Java Spring Boot Backend
   - type: web
     name: adapt-learn-backend
     runtime: java
-    buildCommand: "./mvnw clean package -DskipTests"
-    startCommand: "java -jar target/adapt-learn-0.0.1-SNAPSHOT.jar --server.port=$PORT"
+    region: oregon
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -jar target/adapt-learn-0.0.1-SNAPSHOT.jar
     envVars:
-      - key: DB_URL
+      - key: JAVA_VERSION
+        value: 21
+      - key: DB_HOST
         fromDatabase:
           name: adapt-learn-db
-          property: connectionString
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: adapt-learn-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: adapt-learn-db
+          property: database
       - key: DB_USERNAME
         fromDatabase:
           name: adapt-learn-db
@@ -18,30 +29,27 @@ services:
         fromDatabase:
           name: adapt-learn-db
           property: password
-      - key: JWT_SECRET
-        generateValue: true
+      - key: AI_SERVICE_URL
+        value: http://adapt-learn-ai:10000
       - key: JWT_EXPIRATION
         value: 86400000
-      - key: AI_SERVICE_URL
-        fromService:
-          type: web
-          name: adapt-learn-ai
-          property: host
 
-  # Python AI service
+  # Python AI Service
   - type: web
     name: adapt-learn-ai
-    runtime: python3
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "gunicorn app:app"
+    runtime: python
+    region: oregon
+    rootDir: ai_service
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
     envVars:
       - key: GOOGLE_API_KEY
-        sync: false # You'll need to set this manually in Render dashboard
+        sync: false
+      - key: PORT
+        value: 10000
 
-  # PostgreSQL database
-  - type: pserv
-    name: adapt-learn-db
-    runtime: postgresql
+databases:
+  - name: adapt-learn-db
     databaseName: adapt_learn
-    user: adapt_learn_user
-    ipAllowList: [] # Only accessible by other services in this blueprint
+    user: adapt_user
+    region: oregon
