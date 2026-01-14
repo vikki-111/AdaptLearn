@@ -140,19 +140,7 @@ The backend provides REST APIs for:
 
 All endpoints return JSON responses and use standard HTTP status codes.
 
-## Contributing
-
-We welcome contributions! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
 
 ## License
 
 This project is open source and available under the MIT License.
-
-## Support
-
-If you run into any issues or have questions, please check the existing issues on GitHub or create a new one. We're here to help make learning more effective for everyone.
