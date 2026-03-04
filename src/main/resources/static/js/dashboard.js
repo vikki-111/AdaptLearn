@@ -105,6 +105,18 @@ function processMarkdown(text) {
 }
 
 function processInlineMarkdown(text) {
+    // Handle links [text](url) first - extract them before any escaping
+    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    const links = [];
+    text = text.replace(linkRegex, (match, linkText, url) => {
+        const index = links.length;
+        links.push({ text: linkText, url: url });
+        return `%%LINK${index}%%`;
+    });
+
+    // Escape all HTML to prevent XSS
+    text = escapeHtml(text);
+
     // Handle inline code (`code`)
     text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
 
@@ -116,8 +128,13 @@ function processInlineMarkdown(text) {
     text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
     text = text.replace(/_(.*?)_/g, '<em>$1</em>');
 
-    // Handle links [text](url)
-    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+    // Restore links (they were already escaped via escapeHtml call above)
+    links.forEach((link, index) => {
+        const placeholder = `%%LINK${index}%%`;
+        // Validate URL - only allow http/https
+        const safeUrl = link.url.match(/^https?:\/\//) ? link.url : '';
+        text = text.replace(placeholder, `<a href="${safeUrl}" target="_blank">${link.text}</a>`);
+    });
 
     return text;
 }

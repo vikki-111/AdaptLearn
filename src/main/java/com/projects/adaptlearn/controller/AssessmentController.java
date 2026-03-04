@@ -60,8 +60,10 @@ public class AssessmentController {
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> weakAreas = (List<Map<String, Object>>) payload.get("weakAreas");
 
+            String topic = (String) payload.getOrDefault("topic", "Java");
+
             Assessment result = assessmentService.submitAssessmentWithAnalysis(
-                user, score, detailedResults, weakAreas);
+                user, topic, score, detailedResults, weakAreas);
 
             return ResponseEntity.ok(Map.of(
                     "message", "Assessment processed successfully",

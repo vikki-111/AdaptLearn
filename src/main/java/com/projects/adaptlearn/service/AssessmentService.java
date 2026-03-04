@@ -46,12 +46,12 @@ public class AssessmentService {
     }
 
     @Transactional
-    public Assessment submitAssessmentWithAnalysis(User user, BigDecimal score,
+    public Assessment submitAssessmentWithAnalysis(User user, String topic, BigDecimal score,
                                                   List<Map<String, Object>> detailedResults,
                                                   List<Map<String, Object>> weakAreas) {
         Assessment assessment = new Assessment();
         assessment.setUser(user);
-        assessment.setTitle("Java Basics Diagnostic Test");
+        assessment.setTitle(topic + " Diagnostic Test");
         assessment.setOverallScore(score);
         assessment.setStartedAt(LocalDateTime.now().minusMinutes(10));
         assessment.setStatus(AssessmentStatus.COMPLETED);
@@ -206,6 +206,9 @@ public class AssessmentService {
     // Keep the old method for backward compatibility
     @Transactional
     public Assessment submitAssessment(User user, List<Question> questions, BigDecimal score) {
-        return submitAssessmentWithAnalysis(user, score, null, null);
+        String topic = questions != null && !questions.isEmpty() && questions.get(0).getTopic() != null
+            ? questions.get(0).getTopic().getName()
+            : "General";
+        return submitAssessmentWithAnalysis(user, topic, score, null, null);
     }
 }

@@ -107,8 +107,8 @@ public class UserService {
             throw new ValidationException("Invalid email format");
         }
 
-        if (user.getPassword().length() < 6) {
-            throw new ValidationException("Password must be at least 6 characters long");
+        if (user.getPassword().length() < 8) {
+            throw new ValidationException("Password must be at least 8 characters long");
         }
 
         if (userRepository.existsByEmail(user.getEmail().trim().toLowerCase())) {

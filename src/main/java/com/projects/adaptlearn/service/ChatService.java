@@ -14,7 +14,7 @@ public class ChatService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${ai.service.url:http://localhost:5000}")
+    @Value("${AI_SERVICE_URL:http://127.0.0.1:5000}")
     private String aiServiceUrl;
 
     public String processMessage(String message, String userEmail) {
